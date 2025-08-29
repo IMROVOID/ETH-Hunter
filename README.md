@@ -85,3 +85,15 @@ I'm a passionate professional from Iran specializing in Graphic Design, Web Deve
 *   **Website:** [rovoid.ir](https://rovoid.ir)
 *   **GitHub:** [IMROVOID](https://github.com/IMROVOID)
 *   **LinkedIn:** [Roham Andarzgou](https://www.linkedin.com/in/roham-andarzgouu)
+
+### 🙏 Support This Project
+
+If you find this application useful, please consider a donation. As I am based in Iran, cryptocurrency is the only way I can receive support. Thank you!
+
+| Cryptocurrency | Address |
+| :--- | :--- |
+| **Bitcoin** (BTC) | `bc1qd35yqx3xt28dy6fd87xzd62cj7ch35p68ep3p8` |
+| **Ethereum** (ETH) | `0xA39Dfd80309e881cF1464dDb00cF0a17bF0322e3` |
+| **USDT** (TRC20) | `THMe6FdXkA2Pw45yKaXBHRnkX3fjyKCzfy` |
+| **Solana** (SOL) | `9QZHMTN4Pu6BCxiN2yABEcR3P4sXtBjkog9GXNxWbav1` |
+| **TON** | `UQCp0OawnofpZTNZk-69wlqIx_wQpzKBgDpxY2JK5iynh3mC` |
