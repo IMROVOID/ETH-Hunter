@@ -1,0 +1,25 @@
+--- Project Directory Structure Guide ---
+
+lib
+├── core
+│   └── theme
+│       ├── app_theme.dart
+│       └── app_theme_mode.dart
+├── main.dart
+├── providers
+│   └── app_provider.dart
+├── screens
+│   ├── about_page.dart
+│   ├── main_layout.dart
+│   ├── scan_page.dart
+│   └── settings_page.dart
+├── services
+│   └── scanner_isolate.dart
+├── theme.dart
+└── widgets
+    ├── sidebar_nav_item.dart
+    ├── sidebar_stats_widget.dart
+    └── window_title_bar.dart
+
+pubspec.yaml
+
