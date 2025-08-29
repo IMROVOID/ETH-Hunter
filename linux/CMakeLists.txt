@@ -35,7 +35,6 @@ set(CMAKE_C_FLAGS_PROFILE "${CMAKE_C_FLAGS_RELEASE}")
 set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_RELEASE}")
 
 # Compilation settings that should be applied to most targets.
-# This function is now defined to match what plugins like bitsdojo_window expect.
 function(apply_standard_settings TARGET)
   target_compile_features(${TARGET} PUBLIC cxx_std_17)
   target_compile_options(${TARGET} PRIVATE
@@ -61,21 +60,17 @@ pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
 add_executable(${BINARY_NAME}
   "main.cc"
   "my_application.cc"
+  "my_application.h"
   "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
+  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.h"
 )
 
 # Apply standard settings to the main executable.
 apply_standard_settings(${BINARY_NAME})
 
-# Add support for GStreamer if the video_player plugin is used.
-if (video_player_gstreamer_INCLUDE_DIRS)
-  target_include_directories(${BINARY_NAME} PRIVATE
-    ${video_player_gstreamer_INCLUDE_DIRS}
-  )
-  target_link_libraries(${BINARY_NAME} PRIVATE
-    ${video_player_gstreamer_LIBRARIES}
-  )
-endif()
+target_include_directories(${BINARY_NAME} PRIVATE
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+)
 
 # Add dependency libraries and include directories.
 target_link_libraries(${BINARY_NAME} PRIVATE
@@ -123,7 +118,7 @@ install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_DATA_DIR}")
 # from a previous install.
 set(FLUTTER_ASSET_DIR_NAME "flutter_assets")
 install(CODE "
-  file(REMOVE_RECURse \"${INSTALL_DATA_DIR}/${FLUTTER_ASSET_DIR_NAME}\")
+  file(REMOVE_RECURSE \"${INSTALL_DATA_DIR}/${FLUTTER_ASSET_DIR_NAME}\")
   " COMPONENT Runtime)
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_DATA_DIR}")
