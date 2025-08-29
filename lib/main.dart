@@ -44,8 +44,8 @@ void main() async {
   // Get executable path for portable data storage
   final String executableDirectory;
   // This check ensures we only try to get the executable path in a bundled app,
-  // not during development. In debug mode, it falls back to the documents directory.
-  if (!kDebugMode && Platform.isWindows) {
+  // not during development. In debug mode, it falls back to a safe directory.
+  if (!kDebugMode) {
     executableDirectory = p.dirname(Platform.resolvedExecutable);
   } else {
     executableDirectory = (await getApplicationDocumentsDirectory()).path;
