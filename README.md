@@ -5,11 +5,14 @@
       <p>Welcome to ETH Hunter, a polished and open-source desktop application built with Flutter. This tool is designed as a conceptual exploration of the Ethereum blockchain, allowing users to scan for wallet addresses that contain a balance. It works by generating valid private keys, deriving their public addresses, and checking balances via the Infura API.</p>
       <p>The application is built for performance, using a separate Isolate for scanning to keep the UI perfectly smooth. It features multi-API key support, theme customization that syncs with your system's accent color, and automatic saving of any wallets found with a balance.</p>
     </td>
-    <td align="right">
-      <img src="https://ik.imagekit.io/ROVOID/ETH%20Hunter.png" alt="ETH Hunter App Screenshot" width="800">
-    </td>
   </tr>
 </table>
+
+### 📸 Screenshots
+<p align="center">
+  <img src="https://ik.imagekit.io/ROVOID/Main%20Page%20Dark.png" alt="ETH Hunter Dark Mode" width="48%">
+  <img src="https://ik.imagekit.io/ROVOID/Main%20Page%20Light.png" alt="ETH Hunter Light Mode" width="48%">
+</p>
 
 ---
 
@@ -26,10 +29,19 @@ This is the main control center for the application.
 *   **Wallets to Scan:** Enter the total number of wallets you wish to scan in this session.
     *   Click the **∞ button** to set the value to the maximum number of requests available based on your entered API keys.
 *   **Start / Stop Scanning:** This button starts or stops the scanning process. The UI remains fully responsive while scanning occurs in the background.
+*   **History Button:** Click the clock icon in the top right to view a summary of your session, including total wallets scanned and any winners found with their private keys.
+
+<p align="center">
+  <img src="https://ik.imagekit.io/ROVOID/History.png" alt="History Dialog Screenshot" width="600">
+</p>
 
 ### 2. The Settings Page
 
 This tab allows you to configure the application's core settings.
+
+<p align="center">
+  <img src="https://ik.imagekit.io/ROVOID/Settings.png" alt="Settings Page Screenshot" width="600">
+</p>
 
 *   **Theme:**
     *   **System:** Automatically syncs with your operating system's Light or Dark mode and uses your system's accent color.
