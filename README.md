@@ -58,6 +58,18 @@ The sidebar provides navigation and at-a-glance statistics.
 
 ---
 
+## 💻 Downloads
+
+| Platform | Download Link |
+| :--- | :---: |
+| **Windows** (x64 Installer) | [**Download Setup**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Win-Setup.exe) |
+| **Windows** (x64 Portable) | [**Download Portable**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Win-Portable.zip) |
+| **macOS** (Intel & Apple Silicon) | *Coming Soon* |
+| **Linux** (.deb / .AppImage) | *Coming Soon* |
+| **Android** (.apk) | *Coming Soon* |
+
+---
+
 ## 📜 License & Copyright
 
 This project is completely open source and available to the public. You are free to use, modify, distribute, and fork this software for any purpose. No attribution is required, but it is appreciated.
