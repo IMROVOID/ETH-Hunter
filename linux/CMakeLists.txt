@@ -48,21 +48,18 @@ function(apply_standard_settings TARGET)
   target_compile_definitions(${TARGET} PRIVATE "$<$<CONFIG:Debug>:_DEBUG>")
 endfunction()
 
-# Flutter library and tool build rules.
-set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
-add_subdirectory(${FLUTTER_MANAGED_DIR})
+# Add the Flutter-managed sub-project.
+add_subdirectory(flutter)
 
 # System-level dependencies.
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk+-3.0)
 
-# Application build.
+# Add the application source code.
 add_executable(${BINARY_NAME}
   "main.cc"
   "my_application.cc"
   "my_application.h"
-  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
-  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.h"
 )
 
 # Apply standard settings to the main executable.
@@ -72,9 +69,10 @@ target_include_directories(${BINARY_NAME} PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-# Add dependency libraries and include directories.
+# Link the Flutter library and the plugin libraries.
 target_link_libraries(${BINARY_NAME} PRIVATE
   flutter
+  flutter_wrapper_plugin
   PkgConfig::GTK
 )
 
@@ -107,7 +105,7 @@ endif()
 
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
-install(DIRECTORY "${NATIVE_ASSETS_DIR}"
+install(DIRECTORY "${NATIVE_ASSET_DIR}"
    DESTINATION "${INSTALL_LIB_DIR}"
    COMPONENT Runtime)
 
