@@ -11,18 +11,6 @@
   </tr>
 </table>
 
-### 📸 Screenshots
-<p align="center">
-  <img src="https://ik.imagekit.io/ROVOID/Main%20Page%20Dark.png" alt="ETH Hunter Dark Mode" width="48%">
-  <img src="https://ik.imagekit.io/ROVOID/Main%20Page%20Light.png" alt="ETH Hunter Light Mode" width="48%">
-</p>
-<p align="center">
-  <img src="https://ik.imagekit.io/ROVOID/Settings.png" alt="Settings Page Screenshot" width="48%">
-  <img src="https://ik.imagekit.io/ROVOID/History.png" alt="History Dialog Screenshot" width="48%">
-</p>
-
----
-
 ## ✨ How to Use the App
 
 The interface is designed for simplicity and power. Here’s a breakdown of all its features.
@@ -65,6 +53,18 @@ The sidebar provides navigation and at-a-glance statistics.
     *   **Scanned:** A persistent counter of the total number of wallets scanned across all sessions.
     *   **Winners:** A persistent counter of the total number of wallets found with a balance.
     *   **Requests Left:** An estimate of the total remaining API requests for the current session across all your keys, visualized with a progress bar.
+
+---
+
+### 📸 Screenshots
+<p align="center">
+  <img src="https://ik.imagekit.io/ROVOID/Main%20Page%20Dark.png" alt="ETH Hunter Dark Mode" width="48%">
+  <img src="https://ik.imagekit.io/ROVOID/Main%20Page%20Light.png" alt="ETH Hunter Light Mode" width="48%">
+</p>
+<p align="center">
+  <img src="https://ik.imagekit.io/ROVOID/Settings.png" alt="Settings Page Screenshot" width="48%">
+  <img src="https://ik.imagekit.io/ROVOID/History.png" alt="History Dialog Screenshot" width="48%">
+</p>
 
 ---
 
