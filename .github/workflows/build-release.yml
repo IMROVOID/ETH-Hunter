@@ -53,20 +53,26 @@ jobs:
         shell: pwsh
         run: |
           $portableDir = "ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable"
-          Copy-Item -Path build/windows/x64/runner/Release -Destination $portableDir -Recurse
+          New-Item -ItemType Directory -Force -Path $portableDir
+          Copy-Item -Path build/windows/x64/runner/Release/* -Destination $portableDir -Recurse
           Compress-Archive -Path $portableDir -DestinationPath "$portableDir.zip"
 
       # --- Create EXE Installer using Inno Setup ---
       - name: Install Inno Setup
-        uses: crazy-max/ghaction-inno-setup@v3
+        # FIXED: Updated action version from v3 to v4
+        uses: crazy-max/ghaction-inno-setup@v4
         with:
           version: "6.2.2"
+
+      - name: Copy Icon for Installer
+        # NEW: Copies the icon into the build directory so the installer can find it.
+        run: Copy-Item -Path assets/icons/app.ico -Destination build/windows/x64/runner/Release/app.ico
 
       - name: Build Installer
         shell: pwsh
         run: |
           iscc "build-scripts/inno-setup.iss" `
-            /DAppVersion=${{ steps.set_version.outputs.version }} `
+            /DAppVersion=${{ steps.set_version.outputs.version.substring(1) }} `
             /O"installer-output" `
             /F"ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Setup"
 
@@ -159,7 +165,7 @@ jobs:
       - name: Install create-dmg
         run: brew install create-dmg
 
-      - name: Create DMG
+      - name: Create DMG (Installer)
         run: |
           create-dmg \
             "ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.dmg" \
@@ -204,10 +210,8 @@ jobs:
         with:
           tag_name: ${{ steps.set_version.outputs.version }}
           draft: true
-          # MODIFICATION: This now appends to the existing body if the release was
-          # created manually, or uses a default if creating from a tag push.
-          # The key is that it doesn't delete your custom release notes.
-          body: "Automated cross-platform release of ETH Hunter."
+          # FIXED: By setting append_body to true, this will add artifacts to an
+          # existing draft release without overwriting your manually written notes.
           append_body: true
           files: |
             release-artifacts/windows-build/*.zip
