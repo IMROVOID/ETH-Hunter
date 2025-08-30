@@ -51,19 +51,15 @@ jobs:
       - name: Structure Portable Build
         shell: pwsh
         run: |
-          # This correctly creates a folder and zips it, ensuring the desired root structure.
           $portableDir = "ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable"
           New-Item -ItemType Directory -Force -Path $portableDir
           Copy-Item -Path build/windows/x64/runner/Release/* -Destination $portableDir -Recurse
           Compress-Archive -Path $portableDir -DestinationPath "$portableDir.zip"
 
-      # REMOVED: The Inno Setup installer step has been deleted.
-
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          # MODIFIED: Only the portable .zip file is uploaded.
           path: ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable.zip
 
   # JOB 2: Build the application for Linux
@@ -101,7 +97,6 @@ jobs:
 
       - name: Structure and Package Linux build
         run: |
-          # This correctly creates a folder and zips it, ensuring the desired root structure.
           portableDir="ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable"
           mkdir -p $portableDir
           cp -r build/linux/x64/release/bundle/* $portableDir/
@@ -146,19 +141,24 @@ jobs:
       - name: Install create-dmg
         run: brew install create-dmg
 
-      - name: Create DMG (Installer)
+      # CORRECTED LOGIC STARTS HERE
+      - name: Stage Application Bundle
+        run: |
+          mkdir -p staging
+          cp -r build/macos/Build/Products/Release/eth_hunter.app staging/
+
+      - name: Create DMG (Installer) from Staged App
         run: |
           create-dmg \
             "ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.dmg" \
-            "build/macos/Build/Products/Release/eth_hunter.app"
+            "staging/eth_hunter.app"
 
-      - name: Create ZIP (Portable)
+      - name: Create ZIP (Portable) from Staged App
         run: |
-          # This correctly creates a folder, copies the .app into it, and zips the folder.
           portableDir="ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable"
-          mkdir -p $portableDir
-          cp -r build/macos/Build/Products/Release/eth_hunter.app $portableDir/
-          zip -r "$portableDir.zip" $portableDir
+          mkdir -p "$portableDir"
+          cp -r staging/eth_hunter.app "$portableDir/"
+          zip -r "$portableDir.zip" "$portableDir"
 
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
@@ -194,9 +194,8 @@ jobs:
           tag_name: ${{ steps.set_version.outputs.version }}
           draft: true
           append_body: true
-          # MODIFIED: Removed the .exe file from the release assets.
           files: |
             release-artifacts/windows-build/*.zip
             release-artifacts/linux-build/*.zip
             release-artifacts/macos-build/*.zip
-            release-artifacts/macos-build/*.dmg
+            release-artifacts/macos-build/*.dmg```
