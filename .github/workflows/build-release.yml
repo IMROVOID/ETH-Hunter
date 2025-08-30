@@ -56,7 +56,8 @@ jobs:
       # Package the build output into a portable .zip file
       - name: Package Windows build
         run: |
-          Compress-Archive -Path build/windows/runner/Release -DestinationPath "ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable.zip"
+          # CORRECTED PATH: Added '/x64' to correctly locate the build output.
+          Compress-Archive -Path build/windows/x64/runner/Release -DestinationPath "ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable.zip"
         shell: pwsh
 
       # Upload the packaged file as an artifact for the final release job
@@ -78,7 +79,7 @@ jobs:
 
       # Install necessary Linux build dependencies
       - name: Install Linux dependencies
-        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev zip
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -103,15 +104,15 @@ jobs:
       # Package the build output ('bundle' directory) into a portable .zip file
       - name: Package Linux build
         run: |
-          cd build/linux/x64/release/
-          zip -r "../../ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable.zip" bundle
-          cd -
+          # CORRECTED COMMAND: Creates the zip file in the root directory for consistency.
+          zip -r "ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable.zip" build/linux/x64/release/bundle
           
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-build
-          path: build/linux/x64/ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable.zip
+          # CORRECTED PATH: Points to the zip file created in the root directory.
+          path: ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable.zip
 
   # JOB 3: Build the application for macOS
   build-macos:
