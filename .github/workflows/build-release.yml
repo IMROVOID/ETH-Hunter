@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 jobs:
-  # JOB 1: Build the application for Windows
+  # JOB 1: Build the application for Windows (Portable and Installer)
   build-windows:
     runs-on: windows-latest
 
@@ -56,97 +56,114 @@ jobs:
           Copy-Item -Path build/windows/x64/runner/Release/* -Destination $portableDir -Recurse
           Compress-Archive -Path $portableDir -DestinationPath "$portableDir.zip"
 
-      - name: Prepare Installer Variables
-        id: prep_vars
-        shell: pwsh
-        run: |
-          $versionTag = "${{ steps.set_version.outputs.version }}"
-          $appVersion = $versionTag.Substring(1) # Removes the 'v'
-          echo "app_version=$appVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
-
-      - name: Build Installer with Inno Setup Action
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.1
+      - name: Build Windows Installer with Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
-          # CORRECTED: Use 'path' instead of 'script-file'
-          path: build-scripts/inno-setup.iss
-          # CORRECTED: Use 'options' and format definitions as command-line arguments
-          options: >
-            /DAppVersion=${{ steps.prep_vars.outputs.app_version }}
-            /DProjectRoot=${{ github.workspace }}
-            /DOutputName=ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Setup
-            /DOutputDir=installer-output
+          path: setup.iss
+          options: /DMyAppVersion=${{ steps.set_version.outputs.version }}
 
-      - name: Upload Windows Artifacts
+      - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
           path: |
             ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable.zip
-            installer-output/ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Setup.exe
+            ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Installer.exe
 
   # JOB 2: Build the application for Linux
   build-linux:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-        with: { ref: '${{ github.event.inputs.tag_name || github.ref }}' }
-      - run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev zip
-      - uses: subosito/flutter-action@v2
-        with: { channel: 'stable' }
-      - run: flutter pub get
-      - run: flutter build linux --release
-      - id: set_version
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag_name || github.ref }}
+
+      - name: Install Linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev zip
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux release
+        run: flutter build linux --release
+
+      - name: Set Version Name
+        id: set_version
         run: |
           if [ -n "${{ github.event.inputs.tag_name }}" ]; then
             echo "version=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
           else
             echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
+
       - name: Structure and Package Linux build
         run: |
           portableDir="ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable"
           mkdir -p $portableDir
           cp -r build/linux/x64/release/bundle/* $portableDir/
           zip -r "$portableDir.zip" $portableDir
-      - uses: actions/upload-artifact@v4
-        with: { name: linux-build, path: 'ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable.zip' }
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable.zip
 
   # JOB 3: Build the application for macOS
   build-macos:
     runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v4
-        with: { ref: '${{ github.event.inputs.tag_name || github.ref }}' }
-      - uses: subosito/flutter-action@v2
-        with: { channel: 'stable' }
-      - run: flutter pub get
-      - run: flutter build macos --release
-      - id: set_version
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag_name || github.ref }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS release
+        run: flutter build macos --release
+
+      - name: Set Version Name
+        id: set_version
         run: |
           if [ -n "${{ github.event.inputs.tag_name }}" ]; then
             echo "version=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
           else
             echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
-      - run: brew install create-dmg
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
       - name: Create DMG (Installer)
         run: |
           create-dmg \
             "ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.dmg" \
             "build/macos/Build/Products/Release/eth_hunter.app"
+
       - name: Create ZIP (Portable)
         run: |
-          # Define the name of the folder we want inside the zip
-          PORTABLE_DIR="ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable"
-          # Create a temporary directory structure
-          mkdir -p "dist/$PORTABLE_DIR"
-          # Move the compiled app bundle INTO our new directory
-          mv "build/macos/Build/Products/Release/eth_hunter.app" "dist/$PORTABLE_DIR/"
-          # Go into the directory that contains our prepared folder
-          cd dist
-          # Zip the folder, creating the archive in the parent directory (workspace root)
-          zip -r "../$PORTABLE_DIR.zip" "$PORTABLE_DIR"
-      - uses: actions/upload-artifact@v4
+          portableDir="ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable"
+          mkdir -p $portableDir
+          cp -r build/macos/Build/Products/Release/eth_hunter.app $portableDir/
+          zip -r "$portableDir.zip" $portableDir
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: macos-build
           path: |
@@ -157,19 +174,24 @@ jobs:
   create-release:
     needs: [build-windows, build-linux, build-macos]
     runs-on: ubuntu-latest
+
     steps:
-      - id: set_version
+      - name: Set Version Name
+        id: set_version
         run: |
           if [ -n "${{ github.event.inputs.tag_name }}" ]; then
             echo "version=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
           else
             echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
-      - uses: actions/download-artifact@v4
-        with: { path: release-artifacts }
-      - name: List files for release
-        run: ls -R release-artifacts
-      - uses: softprops/action-gh-release@v2
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: Create Release and Upload Artifacts
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.set_version.outputs.version }}
           draft: true
