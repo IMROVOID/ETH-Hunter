@@ -74,8 +74,8 @@ The sidebar provides navigation and at-a-glance statistics.
 | :--- | :---: |
 | **Windows** (x64 Installer) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Win-Setup.exe) |
 | **Windows** (x64 Portable) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Win-Portable.zip) |
-| **Linux** (.deb / .AppImage) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Linux.zip) |
-| **macOS** (Intel & Apple Silicon) | *Coming Soon* |
+| **Linux** (Portable) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Linux-Portable.zip) |
+| **macOS** (Intel & Apple Silicon) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-macOS.zip) |
 | **Android** (.apk) | *Coming Soon* |
 
 ---
