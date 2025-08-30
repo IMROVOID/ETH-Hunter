@@ -61,8 +61,6 @@ jobs:
         run: |
           Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "inno_setup.exe"
           Start-Process -FilePath "inno_setup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
-          $isccPath = "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe"
-          echo "ISCC_PATH=$isccPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Copy Icon for Installer
         run: Copy-Item -Path assets/icons/app.ico -Destination build/windows/x64/runner/Release/app.ico
@@ -73,8 +71,9 @@ jobs:
           $versionTag = "${{ steps.set_version.outputs.version }}"
           $appVersion = $versionTag.Substring(1) # Removes the 'v'
           
-          # FIXED: Pass the absolute path of the workspace to the Inno Setup script.
-          & $env:ISCC_PATH "build-scripts/inno-setup.iss" `
+          # FIXED: Directly call the Inno Setup compiler using its full, quoted path.
+          # This is the most reliable method and avoids environment variable issues.
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe" "build-scripts/inno-setup.iss" `
             /DProjectRoot="${{ github.workspace }}" `
             /DAppVersion=$appVersion `
             /O"installer-output" `
