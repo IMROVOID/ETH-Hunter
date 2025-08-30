@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 jobs:
-  # JOB 1: Build the application for Windows
+  # JOB 1: Build the application for Windows (Portable Only)
   build-windows:
     runs-on: windows-latest
 
@@ -56,39 +56,11 @@ jobs:
           Copy-Item -Path build/windows/x64/runner/Release/* -Destination $portableDir -Recurse
           Compress-Archive -Path $portableDir -DestinationPath "$portableDir.zip"
 
-      - name: Download and Install Inno Setup
-        shell: pwsh
-        run: |
-          # Download and run the installer silently
-          Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "inno_setup.exe"
-          Start-Process -FilePath "inno_setup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
-          
-          # FIX: Add Inno Setup compiler to the GitHub Actions path for subsequent steps
-          echo "${env:ProgramFiles(x86)}\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
-      - name: Copy Icon for Installer
-        run: Copy-Item -Path assets/icons/app.ico -Destination build/windows/x64/runner/Release/app.ico
-
-      - name: Build Installer
-        shell: pwsh
-        run: |
-          $versionTag = "${{ steps.set_version.outputs.version }}"
-          $appVersion = $versionTag.Substring(1) # Removes the 'v'
-          
-          # FIXED: Call iscc.exe directly now that its location is in the PATH
-          iscc.exe "build-scripts/inno-setup.iss" `
-            /DProjectRoot="${{ github.workspace }}" `
-            /DAppVersion=$appVersion `
-            /O"installer-output" `
-            /F"ETH-Hunter-$versionTag-Windows-Setup"
-
-      - name: Upload Windows Artifacts
+      - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: |
-            ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable.zip
-            installer-output/ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Setup.exe
+          path: ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable.zip
 
   # JOB 2: Build the application for Linux
   build-linux:
@@ -215,7 +187,6 @@ jobs:
           append_body: true
           files: |
             release-artifacts/windows-build/*.zip
-            release-artifacts/windows-build/*.exe
             release-artifacts/linux-build/*.zip
             release-artifacts/macos-build/*.zip
             release-artifacts/macos-build/*.dmg
