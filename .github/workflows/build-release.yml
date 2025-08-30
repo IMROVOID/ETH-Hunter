@@ -149,7 +149,9 @@ jobs:
 
       - name: Create ZIP (Portable)
         run: |
-          zip -r "ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable.zip" "build/macos/Build/Products/Release/eth_hunter.app"
+          # Change directory to the location of the .app to ensure correct archive structure
+          cd build/macos/Build/Products/Release
+          zip -r "../../../../ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable.zip" "eth_hunter.app"
 
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
