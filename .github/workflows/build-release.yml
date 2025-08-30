@@ -59,22 +59,24 @@ jobs:
 
       # --- Create EXE Installer using Inno Setup ---
       - name: Install Inno Setup
-        # FIXED: Updated action version from v3 to v4
         uses: crazy-max/ghaction-inno-setup@v4
         with:
           version: "6.2.2"
 
       - name: Copy Icon for Installer
-        # NEW: Copies the icon into the build directory so the installer can find it.
         run: Copy-Item -Path assets/icons/app.ico -Destination build/windows/x64/runner/Release/app.ico
 
       - name: Build Installer
         shell: pwsh
         run: |
+          # FIXED: Use PowerShell for string manipulation, not the GitHub expression.
+          $versionTag = "${{ steps.set_version.outputs.version }}"
+          $appVersion = $versionTag.Substring(1) # Removes the 'v'
+          
           iscc "build-scripts/inno-setup.iss" `
-            /DAppVersion=${{ steps.set_version.outputs.version.substring(1) }} `
+            /DAppVersion=$appVersion `
             /O"installer-output" `
-            /F"ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Setup"
+            /F"ETH-Hunter-$versionTag-Windows-Setup"
 
       # Upload both the portable ZIP and the installer EXE
       - name: Upload Windows Artifacts
@@ -210,8 +212,6 @@ jobs:
         with:
           tag_name: ${{ steps.set_version.outputs.version }}
           draft: true
-          # FIXED: By setting append_body to true, this will add artifacts to an
-          # existing draft release without overwriting your manually written notes.
           append_body: true
           files: |
             release-artifacts/windows-build/*.zip
