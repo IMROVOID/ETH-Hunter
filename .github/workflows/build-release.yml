@@ -58,11 +58,14 @@ jobs:
           Compress-Archive -Path $portableDir -DestinationPath "$portableDir.zip"
 
       # --- Create EXE Installer using Inno Setup ---
-      - name: Install Inno Setup
-        # CORRECTED: Use @v4
-        uses: crazy-max/ghaction-inno-setup@v4
-        with:
-          version: "6.2.2"
+      - name: Download and Install Inno Setup
+        # FIXED: Removed the external action and replaced it with a direct download.
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "inno_setup.exe"
+          Start-Process -FilePath "inno_setup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
+          $isccPath = "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe"
+          echo "ISCC_PATH=$isccPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Copy Icon for Installer
         run: Copy-Item -Path assets/icons/app.ico -Destination build/windows/x64/runner/Release/app.ico
@@ -73,7 +76,7 @@ jobs:
           $versionTag = "${{ steps.set_version.outputs.version }}"
           $appVersion = $versionTag.Substring(1) # Removes the 'v'
           
-          iscc "build-scripts/inno-setup.iss" `
+          & $env:ISCC_PATH "build-scripts/inno-setup.iss" `
             /DAppVersion=$appVersion `
             /O"installer-output" `
             /F"ETH-Hunter-$versionTag-Windows-Setup"
@@ -175,9 +178,8 @@ jobs:
 
       - name: Create ZIP (Portable)
         run: |
-          cd build/macos/Build/Products/Release/
-          zip -r "../../ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable.zip" eth_hunter.app
-          cd -
+          # Simplified command for better readability
+          zip -r "ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable.zip" "build/macos/Build/Products/Release/eth_hunter.app"
 
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
@@ -185,7 +187,7 @@ jobs:
           name: macos-build
           path: |
             ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.dmg
-            build/macos/ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable.zip
+            ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable.zip
 
   # JOB 4: Create the final GitHub Release
   create-release:
