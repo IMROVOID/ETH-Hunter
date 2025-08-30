@@ -48,7 +48,6 @@ jobs:
           }
         shell: pwsh
 
-      # --- Create Portable ZIP with correct folder structure ---
       - name: Structure Portable Build
         shell: pwsh
         run: |
@@ -57,9 +56,7 @@ jobs:
           Copy-Item -Path build/windows/x64/runner/Release/* -Destination $portableDir -Recurse
           Compress-Archive -Path $portableDir -DestinationPath "$portableDir.zip"
 
-      # --- Create EXE Installer using Inno Setup ---
       - name: Download and Install Inno Setup
-        # FIXED: Removed the external action and replaced it with a direct download.
         shell: pwsh
         run: |
           Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "inno_setup.exe"
@@ -76,12 +73,13 @@ jobs:
           $versionTag = "${{ steps.set_version.outputs.version }}"
           $appVersion = $versionTag.Substring(1) # Removes the 'v'
           
+          # FIXED: Pass the absolute path of the workspace to the Inno Setup script.
           & $env:ISCC_PATH "build-scripts/inno-setup.iss" `
+            /DProjectRoot="${{ github.workspace }}" `
             /DAppVersion=$appVersion `
             /O"installer-output" `
             /F"ETH-Hunter-$versionTag-Windows-Setup"
 
-      # Upload both the portable ZIP and the installer EXE
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -123,7 +121,6 @@ jobs:
             echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
 
-      # --- Create Portable ZIP with correct folder structure ---
       - name: Structure and Package Linux build
         run: |
           portableDir="ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable"
@@ -178,7 +175,6 @@ jobs:
 
       - name: Create ZIP (Portable)
         run: |
-          # Simplified command for better readability
           zip -r "ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable.zip" "build/macos/Build/Products/Release/eth_hunter.app"
 
       - name: Upload macOS Artifacts
