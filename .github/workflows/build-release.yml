@@ -198,4 +198,4 @@ jobs:
             release-artifacts/windows-build/*.zip
             release-artifacts/linux-build/*.zip
             release-artifacts/macos-build/*.zip
-            release-artifacts/macos-build/*.dmg```
+            release-artifacts/macos-build/*.dmg
