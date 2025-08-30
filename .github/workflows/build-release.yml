@@ -63,7 +63,7 @@ jobs:
           Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "inno_setup.exe"
           Start-Process -FilePath "inno_setup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
           
-          # Add Inno Setup compiler to the GitHub Actions path
+          # FIX: Add Inno Setup compiler to the GitHub Actions path for subsequent steps
           echo "${env:ProgramFiles(x86)}\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Copy Icon for Installer
@@ -75,7 +75,7 @@ jobs:
           $versionTag = "${{ steps.set_version.outputs.version }}"
           $appVersion = $versionTag.Substring(1) # Removes the 'v'
           
-          # Now we can call iscc.exe directly because it's in the PATH
+          # FIXED: Call iscc.exe directly now that its location is in the PATH
           iscc.exe "build-scripts/inno-setup.iss" `
             /DProjectRoot="${{ github.workspace }}" `
             /DAppVersion=$appVersion `
