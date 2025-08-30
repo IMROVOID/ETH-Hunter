@@ -1,0 +1,77 @@
+# FILE: .github/workflows/build-release.yml
+
+name: Build and Release
+
+on:
+  # This trigger runs automatically when you push a new tag (e.g., v1.0.1)
+  push:
+    tags:
+      - 'v*.*.*'
+  
+  # This new trigger allows you to run the workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'The tag to build (e.g., v1.0.0). This will be used for naming and the release.'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        # We need to fetch the specific tag when running manually
+        with:
+          ref: ${{ github.event.inputs.tag_name || github.ref }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS release
+        run: flutter build macos --release
+      
+      # Determine the version name from the trigger type
+      - name: Set Version Name
+        id: set_version
+        run: |
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            echo "version=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Create DMG
+        run: |
+          create-dmg \
+            "ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.dmg" \
+            "build/macos/Build/Products/Release/eth_hunter.app"
+
+      - name: Create ZIP
+        run: |
+          cd build/macos/Build/Products/Release/
+          zip -r "ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.zip" eth_hunter.app
+          cd -
+
+      - name: Create or Update Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.set_version.outputs.version }}
+          draft: true
+          body: "Automated release of ETH Hunter for macOS."
+          files: |
+            build/macos/Build/Products/Release/ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.zip
+            build/macos/Build/Products/Release/ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.dmg
