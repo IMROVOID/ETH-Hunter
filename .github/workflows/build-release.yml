@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 jobs:
-  # JOB 1: Build the application for Windows (Portable and Installer)
+  # JOB 1: Build the application for Windows (Portable Only)
   build-windows:
     runs-on: windows-latest
 
@@ -51,24 +51,20 @@ jobs:
       - name: Structure Portable Build
         shell: pwsh
         run: |
+          # This correctly creates a folder and zips it, ensuring the desired root structure.
           $portableDir = "ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable"
           New-Item -ItemType Directory -Force -Path $portableDir
           Copy-Item -Path build/windows/x64/runner/Release/* -Destination $portableDir -Recurse
           Compress-Archive -Path $portableDir -DestinationPath "$portableDir.zip"
 
-      - name: Build Windows Installer with Inno Setup
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
-        with:
-          path: setup.iss
-          options: /DMyAppVersion=${{ steps.set_version.outputs.version }} /O+
+      # REMOVED: The Inno Setup installer step has been deleted.
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: |
-            ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable.zip
-            ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Installer.exe
+          # MODIFIED: Only the portable .zip file is uploaded.
+          path: ETH-Hunter-${{ steps.set_version.outputs.version }}-Windows-Portable.zip
 
   # JOB 2: Build the application for Linux
   build-linux:
@@ -105,6 +101,7 @@ jobs:
 
       - name: Structure and Package Linux build
         run: |
+          # This correctly creates a folder and zips it, ensuring the desired root structure.
           portableDir="ETH-Hunter-${{ steps.set_version.outputs.version }}-Linux-Portable"
           mkdir -p $portableDir
           cp -r build/linux/x64/release/bundle/* $portableDir/
@@ -157,6 +154,7 @@ jobs:
 
       - name: Create ZIP (Portable)
         run: |
+          # This correctly creates a folder, copies the .app into it, and zips the folder.
           portableDir="ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable"
           mkdir -p $portableDir
           cp -r build/macos/Build/Products/Release/eth_hunter.app $portableDir/
@@ -196,9 +194,9 @@ jobs:
           tag_name: ${{ steps.set_version.outputs.version }}
           draft: true
           append_body: true
+          # MODIFIED: Removed the .exe file from the release assets.
           files: |
             release-artifacts/windows-build/*.zip
-            release-artifacts/windows-build/*.exe
             release-artifacts/linux-build/*.zip
             release-artifacts/macos-build/*.zip
-            release-artifacts/macos-build/*.dmg
+            release-artifacts/macos-build/*.dmg```
