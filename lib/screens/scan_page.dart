@@ -1,15 +1,22 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:io' show Platform;
 
 import '../providers/app_provider.dart';
 import '../core/theme/app_theme.dart';
 
 class ScanPage extends StatelessWidget {
   const ScanPage({super.key});
+
+  bool get isMobile {
+    if (kIsWeb) return false;
+    return Platform.isAndroid || Platform.isIOS;
+  }
 
   void _launchEtherscan(String address) async {
     final uri = Uri.parse('https://etherscan.io/address/$address');
@@ -31,20 +38,33 @@ class ScanPage extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'ETH Hunter',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w200),
-            ),
-            IconButton(
-              icon: Icon(Icons.history, color: customColors.textMuted),
-              tooltip: 'View Session History',
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  barrierColor: Colors.black.withOpacity(0.3),
-                  builder: (_) => const _HistoryDialog(),
-                );
-              },
+            const Text('ETH Hunter', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w200)),
+            Row(
+              children: [
+                if (isMobile)
+                  IconButton(
+                    icon: Icon(Icons.bar_chart, color: customColors.textMuted),
+                    tooltip: 'View Stats',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        barrierColor: Colors.black.withAlpha((255 * 0.3).round()),
+                        builder: (_) => const _MobileStatsDialog(),
+                      );
+                    },
+                  ),
+                IconButton(
+                  icon: Icon(Icons.history, color: customColors.textMuted),
+                  tooltip: 'View Session History',
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      barrierColor: Colors.black.withAlpha((255 * 0.3).round()),
+                      builder: (_) => const _HistoryDialog(),
+                    );
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -67,18 +87,9 @@ class ScanPage extends StatelessWidget {
                       isDense: true,
                       filled: true,
                       fillColor: customColors.glassBg,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: customColors.borderColor),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: customColors.borderColor),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: theme.colorScheme.primary),
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: theme.colorScheme.primary)),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.all_inclusive),
@@ -97,9 +108,7 @@ class ScanPage extends StatelessWidget {
                 backgroundColor: theme.colorScheme.primary,
                 foregroundColor: theme.colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
               ),
               child: Text(appProvider.isScanning ? 'Stop Scanning' : 'Start Scanning'),
             ),
@@ -135,16 +144,11 @@ class ScanPage extends StatelessWidget {
                             TextSpan(text: 'Balance: ', style: TextStyle(color: customColors.textMuted)),
                             TextSpan(
                               text: '${log.balance.toStringAsFixed(6)} ETH\n',
-                              style: TextStyle(
-                                color: isWinner ? customColors.green : customColors.red,
-                                fontWeight: isWinner ? FontWeight.bold : FontWeight.normal,
-                              ),
+                              style: TextStyle(color: isWinner ? customColors.green : customColors.red, fontWeight: isWinner ? FontWeight.bold : FontWeight.normal),
                             ),
                             TextSpan(
                               text: log.address,
-                              style: TextStyle(
-                                color: theme.colorScheme.primary,
-                              ),
+                              style: TextStyle(color: theme.colorScheme.primary),
                               recognizer: TapGestureRecognizer()..onTap = () => _launchEtherscan(log.address),
                             ),
                           ],
@@ -177,7 +181,7 @@ class _HistoryDialog extends StatelessWidget {
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       child: AlertDialog(
-        backgroundColor: (isDark ? const Color(0xFF1F1F1F) : Colors.white).withOpacity(0.85),
+        backgroundColor: (isDark ? const Color(0xFF1F1F1F) : Colors.white).withAlpha((255 * 0.85).round()),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: customColors.borderColor),
@@ -216,6 +220,81 @@ class _HistoryDialog extends StatelessWidget {
                           return _WinnerCard(winner: winner);
                         },
                       ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MobileStatsDialog extends StatelessWidget {
+  const _MobileStatsDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final customColors = theme.extension<CustomColors>()!;
+    final totalStats = context.select((AppProvider p) => p.getTotalStats());
+    final appProvider = context.watch<AppProvider>();
+
+    Color getProgressColor(double percentage) {
+      if (percentage > 50) return customColors.green;
+      if (percentage > 25) return customColors.yellow;
+      if (percentage > 10) return customColors.orange;
+      return customColors.red;
+    }
+
+    final progressColor = getProgressColor(totalStats.percentage);
+
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      child: AlertDialog(
+        backgroundColor: (isDark ? const Color(0xFF1F1F1F) : Colors.white).withAlpha((255 * 0.85).round()),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: customColors.borderColor),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.bar_chart),
+            SizedBox(width: 10),
+            Text('Stats'),
+          ],
+        ),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _StatItem(label: 'Total Scanned', value: appProvider.totalScanned.toString()),
+              const SizedBox(height: 8),
+              _StatItem(label: 'Total Winners', value: appProvider.totalWinners.toString(), valueColor: customColors.green),
+              const Divider(height: 24),
+              const Text("Requests Left", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: totalStats.percentage / 100,
+                backgroundColor: Colors.black.withAlpha((255 * 0.3).round()),
+                color: progressColor,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  "~${totalStats.remaining.toStringAsFixed(0)}",
+                  style: TextStyle(fontSize: 12, color: customColors.textMuted, fontWeight: FontWeight.w300),
+                ),
               ),
             ],
           ),

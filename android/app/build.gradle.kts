@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "ROVOID.eth_hunter"
+    namespace = "com.example.eth_hunter"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "ROVOID.eth_hunter"
+        applicationId = "com.example.eth_hunter"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

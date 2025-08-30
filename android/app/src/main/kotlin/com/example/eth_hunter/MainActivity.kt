@@ -1,4 +1,4 @@
-package ROVOID.eth_hunter
+package com.example.eth_hunter
 
 import io.flutter.embedding.android.FlutterActivity
 

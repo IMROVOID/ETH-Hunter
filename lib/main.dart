@@ -1,5 +1,5 @@
 // =================================================================================
-// ETH Hunter :: A Polished Flutter Desktop Application
+// ETH Hunter :: A Polished Flutter Desktop/Mobile Application
 // Developed by ROVOID (Roham Andarzgou)
 //
 // --- SUPPORT THIS PROJECT ---
@@ -21,12 +21,13 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:system_theme/system_theme.dart';
+import 'package:dynamic_color/dynamic_color.dart'; // MODIFICATION: Added for wallpaper color
 
 import 'core/theme/app_theme.dart';
 import 'providers/app_provider.dart';
 import 'screens/main_layout.dart';
 
-// **MODIFICATION**: Custom ScrollBehavior to enable smooth scrolling with a mouse.
+// MODIFICATION: Custom ScrollBehavior to enable smooth scrolling with a mouse.
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
   Set<PointerDeviceKind> get dragDevices => {
@@ -37,44 +38,60 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
+// MODIFICATION: Helper function to check for desktop platforms
+bool isDesktop() {
+  if (kIsWeb) return false;
+  return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
+  
+  // MODIFICATION: Desktop-only window initialization
+  if (isDesktop()) {
+    await windowManager.ensureInitialized();
+  }
 
-  // Get executable path for portable data storage
+  // MODIFICATION: Platform-aware path for portable data storage
   final String executableDirectory;
-  // This check ensures we only try to get the executable path in a bundled app,
-  // not during development. In debug mode, it falls back to a safe directory.
-  if (!kDebugMode) {
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    executableDirectory = (await getApplicationDocumentsDirectory()).path;
+  } else if (!kDebugMode && isDesktop()) {
     executableDirectory = p.dirname(Platform.resolvedExecutable);
   } else {
     executableDirectory = (await getApplicationDocumentsDirectory()).path;
   }
 
-  WindowOptions windowOptions = const WindowOptions(
-    size: Size(900, 620),
-    minimumSize: Size(800, 600),
-    center: true,
-    backgroundColor: Colors.transparent,
-    skipTaskbar: false,
-    titleBarStyle: TitleBarStyle.hidden,
-  );
+  // MODIFICATION: Desktop-only window options
+  if (isDesktop()) {
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(900, 620),
+      minimumSize: Size(800, 600),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.hidden,
+    );
 
-  windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
 
   runApp(MyApp(executableDirectory: executableDirectory));
-
-  doWhenWindowReady(() {
-    final win = appWindow;
-    win.minSize = const Size(800, 600);
-    win.size = const Size(900, 620);
-    win.alignment = Alignment.center;
-    win.title = "ETH Hunter";
-    win.show();
-  });
+  
+  // MODIFICATION: Desktop-only bitsdojo_window setup
+  if (isDesktop()) {
+    doWhenWindowReady(() {
+      final win = appWindow;
+      win.minSize = const Size(800, 600);
+      win.size = const Size(900, 620);
+      win.alignment = Alignment.center;
+      win.title = "ETH Hunter";
+      win.show();
+    });
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -83,23 +100,33 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fetch the latest system accent color every time the app builds.
-    final accentColor = SystemTheme.accentColor.accent;
-
     return ChangeNotifierProvider(
       create: (context) => AppProvider(executableDirectory: executableDirectory),
-      child: Consumer<AppProvider>(
-        builder: (context, appProvider, child) {
-          return MaterialApp(
-            title: 'ETH Hunter',
-            debugShowCheckedModeBanner: false,
-            // **MODIFICATION**: Apply the custom scroll behavior globally.
-            scrollBehavior: MyCustomScrollBehavior(),
-            // Pass the fetched accent color to the theme builders.
-            theme: AppTheme.light(accentColor),
-            darkTheme: AppTheme.dark(accentColor),
-            themeMode: appProvider.themeMode.flutterThemeMode,
-            home: const MainLayout(),
+      // MODIFICATION: Use DynamicColorBuilder for Material You theming on Android
+      child: DynamicColorBuilder(
+        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+          // Determine the accent color based on platform
+          Color accentColor;
+          if (lightDynamic != null && darkDynamic != null) {
+            // Use wallpaper color on Android
+            accentColor = lightDynamic.primary;
+          } else {
+            // Use system accent color on Desktop
+            accentColor = SystemTheme.accentColor.accent;
+          }
+
+          return Consumer<AppProvider>(
+            builder: (context, appProvider, child) {
+              return MaterialApp(
+                title: 'ETH Hunter',
+                debugShowCheckedModeBanner: false,
+                scrollBehavior: MyCustomScrollBehavior(),
+                theme: AppTheme.light(accentColor),
+                darkTheme: AppTheme.dark(accentColor),
+                themeMode: appProvider.themeMode.flutterThemeMode,
+                home: const MainLayout(),
+              );
+            },
           );
         },
       ),
