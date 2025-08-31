@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
+import 'dart:ui'; // MODIFICATION: Corrected 'dart.ui' to 'dart:ui'
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -81,20 +81,24 @@ class _MainLayoutState extends State<MainLayout> {
   
   void _onItemTapped(int index) {
     if (_selectedIndex == index) return;
+    
     setState(() {
       _selectedIndex = index;
     });
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOutCubic,
-    );
+
+    if (!isDesktop) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // For desktop glass effect
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           isDesktop
@@ -129,8 +133,6 @@ class _MainLayoutState extends State<MainLayout> {
   
   Widget _buildDesktopLayout(BuildContext context) {
     final customColors = Theme.of(context).extension<CustomColors>()!;
-    // Use a separate PageController for desktop to disable swiping
-    final desktopPageController = PageController();
 
     return Column(
       children: [
@@ -173,11 +175,7 @@ class _MainLayoutState extends State<MainLayout> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(0, 0, 30, 30),
-                      child: PageView(
-                        controller: desktopPageController, // Use desktop controller
-                        physics: const NeverScrollableScrollPhysics(), // Disable swipe
-                        children: _pages,
-                      ),
+                      child: _pages[_selectedIndex],
                     ),
                   ),
                 ],
