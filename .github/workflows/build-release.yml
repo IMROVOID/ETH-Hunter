@@ -181,8 +181,8 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '12.x'
-          
+          java-version: '17' # <-- THIS WAS THE FIX (changed from 12.x)
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
