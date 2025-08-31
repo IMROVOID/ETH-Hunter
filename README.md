@@ -65,6 +65,12 @@ The sidebar provides navigation and at-a-glance statistics.
   <img src="https://ik.imagekit.io/ROVOID/Settings.png" alt="Settings Page Screenshot" width="48%">
   <img src="https://ik.imagekit.io/ROVOID/History.png" alt="History Dialog Screenshot" width="48%">
 </p>
+<p align="center">
+  <img src="https://ik.imagekit.io/ROVOID/ETH%20Hunter%20v1.0.1%20Android%201.jpg" alt="Android Home Page" width="25%">
+  <img src="https://ik.imagekit.io/ROVOID/ETH%20Hunter%20v1.0.1%20Android%202.jpg" alt="Android Settings Page Light" width="25%">
+  <img src="https://ik.imagekit.io/ROVOID/ETH%20Hunter%20v1.0.1%20Android%202.5.jpg" alt="Android Settings Page Dark" width="25%">
+  <img src="https://ik.imagekit.io/ROVOID/ETH%20Hunter%20v1.0.1%20Android%203.jpg" alt="Android Scanner Stats" width="25%">
+</p>
 
 ---
 
