@@ -5,7 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_linux
   dynamic_color
-  screen_retriever
+  screen_retriever_linux
   system_theme
   url_launcher_linux
   window_manager

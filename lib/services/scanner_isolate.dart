@@ -45,6 +45,7 @@ void scannerIsolateEntry(Map<String, dynamic> context) async {
       if (ethBalance > 0) {
         winners++;
         final winnerFile = File('$savePath/winner.txt');
+        // MODIFICATION: The 'privateKey' getter returns a Uint8List, which is passed to the existing helper function.
         final privateKeyHex = bytesToHex(privateKey.privateKey);
         // Add private key to the message map to send back to the provider
         logMessage['privateKey'] = privateKeyHex;
