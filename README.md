@@ -70,13 +70,92 @@ The sidebar provides navigation and at-a-glance statistics.
 
 ## 💻 Downloads
 
-| Platform | Download Link |
-| :--- | :---: |
-| **Windows** (x64 Installer) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Win-Setup.exe) |
-| **Windows** (x64 Portable) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Win-Portable.zip) |
-| **Linux** (Portable) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-Linux-Portable.zip) |
-| **macOS** (Intel & Apple Silicon) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.0/ETH-Hunter-v1.0.0-macOS.zip) |
-| **Android** (.apk) | *Coming Soon* |
+| Platform | Download Link (Installer) | Download Link (Portable) |
+| :--- | :---: | :---: |
+| **Windows** (x64) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Win-Setup.exe) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Win-Portable.zip) |
+| **macOS** (Intel & Apple Silicon) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-macOS-Installer.dmg) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-macOS.zip) |
+| **Linux** (x64) | - | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Linux-Portable.zip) |
+| **Android** (.apk) | - | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Android.apk) |
+
+---
+
+## 👨‍💻 For Developers
+
+This section provides a guide for developers who want to understand the codebase, build from source, or contribute to the project.
+
+### Codebase Overview
+
+The project is structured to separate concerns, making it easier to navigate and maintain.
+
+*   **`lib/main.dart`**: The entry point of the application. It handles platform-specific initializations (like setting up the desktop window size) and launches the main `MyApp` widget.
+*   **`lib/providers/app_provider.dart`**: This is the core state management hub, using `ChangeNotifier` from the Provider package. It manages the application's entire state, including theme settings, API key storage, scanning status, log entries, and update checks.
+*   **`lib/services/scanner_isolate.dart`**: This file contains the high-performance scanning logic. The entire process runs inside a separate `Isolate` (a different thread) to ensure the UI remains smooth and responsive. It communicates with the `AppProvider` using a `SendPort` to send back logs, winners, and API usage stats.
+*   **`lib/screens/`**: This directory holds the UI for each of the main views in the application.
+    *   `main_layout.dart`: The main scaffold that contains the sidebar for desktop and the bottom navigation bar for mobile. It manages the page view and the animated background.
+    *   `scan_page.dart`: The UI for the primary scanning interface.
+    *   `settings_page.dart`: The UI for managing the theme and Infura API keys.
+    *   `about_page.dart`: The UI containing app info, social links, and donation details.
+*   **`lib/core/theme/`**: Contains the theme definition (`app_theme.dart`), which uses a custom `ThemeExtension` (`CustomColors`) to define a rich, accessible color palette for both light and dark modes.
+
+### Building from Source
+
+To build and run this project locally, you'll need the Flutter SDK installed.
+
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/IMROVOID/ETH-Hunter.git
+    ```
+2.  **Navigate to the Project Directory:**
+    ```bash
+    cd ETH-Hunter
+    ```
+3.  **Install Dependencies:**
+    ```bash
+    flutter pub get
+    ```
+4.  **Run the App:**
+    Connect a device or start an emulator, then run the build command for your desired platform:
+    ```bash
+    # To run on Windows desktop
+    flutter run -d windows
+
+    # To run on macOS desktop
+    flutter run -d macos
+
+    # To run on Linux desktop
+    flutter run -d linux
+
+    # To run on an Android device
+    flutter run -d android
+    ```
+
+### Using the GitHub Actions Workflow for Releases
+
+This repository includes a pre-configured GitHub Actions workflow that automatically builds and releases the application for all supported platforms.
+
+1.  **Fork the Repository:**
+    Click the "Fork" button at the top right of this page to create your own copy of the repository.
+
+2.  **Enable Actions on Your Fork:**
+    Navigate to the "Actions" tab in your forked repository. You may need to enable workflows if they are disabled on forks by default.
+
+3.  **Make Your Changes:**
+    Clone your forked repository, create a new branch, and make any code modifications you need.
+
+4.  **Push a New Version Tag:**
+    The workflow is triggered when you push a tag that starts with `v` (e.g., `v1.0.2`, `v1.1.0`). To do this:
+    ```bash
+    # Commit your changes first
+    git commit -am "My new feature"
+    git push origin main
+
+    # Create and push a new tag
+    git tag v1.0.2
+    git push origin v1.0.2
+    ```
+
+5.  **Monitor the Workflow:**
+    Go to the "Actions" tab in your forked repository. You will see the "Build & Release" workflow running. It will build the app for Windows, macOS, Linux, and Android, then create a new **draft release** on your repository's "Releases" page with all the compiled application files attached as artifacts.
 
 ---
 
