@@ -32,7 +32,7 @@ class ScanPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return SafeArea(
-      bottom: false, // Allow content to extend to the screen bottom
+      bottom: false, // Allows content to extend to the screen bottom, behind the navbar
       child: Padding(
         padding: const EdgeInsets.fromLTRB(21.0, 15.0, 21.0, 0),
         child: Column(
@@ -109,54 +109,57 @@ class ScanPage extends StatelessWidget {
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(15),
+                    margin: const EdgeInsets.only(bottom: 15), // Space for the navbar area
                     decoration: BoxDecoration(
                       color: customColors.glassBg,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: customColors.borderColor),
                     ),
-                    child: ListView.builder(
-                      controller: appProvider.scrollController,
-                      padding: const EdgeInsets.only(bottom: 80),
-                      itemCount: appProvider.logs.length,
-                      itemBuilder: (context, index) {
-                        final log = appProvider.logs[index];
-                        final isWinner = log.balance > 0;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SelectableText.rich(
-                                TextSpan(
-                                  style: const TextStyle(fontFamily: 'Inter', fontSize: 13, fontWeight: FontWeight.w400, height: 1.5),
-                                  children: [
-                                    TextSpan(text: 'Scan: ${log.totalScan} | ', style: TextStyle(color: customColors.textMuted)),
-                                    TextSpan(text: 'Winners: ${log.winnerCount} | ', style: TextStyle(color: customColors.green)),
-                                    TextSpan(text: 'Balance: ', style: TextStyle(color: customColors.textMuted)),
-                                    TextSpan(
-                                      text: '${log.balance.toStringAsFixed(6)} ETH\n',
-                                      style: TextStyle(color: isWinner ? customColors.green : customColors.red, fontWeight: isWinner ? FontWeight.bold : FontWeight.normal),
-                                    ),
-                                    TextSpan(
-                                      text: log.address,
-                                      style: TextStyle(color: theme.colorScheme.primary),
-                                      recognizer: TapGestureRecognizer()..onTap = () => _launchEtherscan(log.address),
-                                    ),
-                                  ],
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: ListView.builder(
+                        controller: appProvider.scrollController,
+                        padding: const EdgeInsets.all(15),
+                        itemCount: appProvider.logs.length,
+                        itemBuilder: (context, index) {
+                          final log = appProvider.logs[index];
+                          final isWinner = log.balance > 0;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SelectableText.rich(
+                                  TextSpan(
+                                    style: const TextStyle(fontFamily: 'Inter', fontSize: 13, fontWeight: FontWeight.w400, height: 1.5),
+                                    children: [
+                                      TextSpan(text: 'Scan: ${log.totalScan} | ', style: TextStyle(color: customColors.textMuted)),
+                                      TextSpan(text: 'Winners: ${log.winnerCount} | ', style: TextStyle(color: customColors.green)),
+                                      TextSpan(text: 'Balance: ', style: TextStyle(color: customColors.textMuted)),
+                                      TextSpan(
+                                        text: '${log.balance.toStringAsFixed(6)} ETH\n',
+                                        style: TextStyle(color: isWinner ? customColors.green : customColors.red, fontWeight: isWinner ? FontWeight.bold : FontWeight.normal),
+                                      ),
+                                      TextSpan(
+                                        text: log.address,
+                                        style: TextStyle(color: theme.colorScheme.primary),
+                                        recognizer: TapGestureRecognizer()..onTap = () => _launchEtherscan(log.address),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              if (index < appProvider.logs.length - 1)
-                                const Divider(height: 16),
-                            ],
-                          ),
-                        );
-                      },
+                                if (index < appProvider.logs.length - 1)
+                                  const Divider(height: 16),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   if (isMobile)
                     Positioned(
-                      bottom: 15,
+                      bottom: 30, // 15px margin from bottom of log panel + 15px margin for navbar
                       right: 15,
                       child: FloatingActionButton(
                         onPressed: appProvider.isScanning ? appProvider.stopScanning : appProvider.startScanning,
@@ -178,8 +181,6 @@ class ScanPage extends StatelessWidget {
                 ],
               ),
             ),
-            // This SizedBox creates the space at the bottom for the navbar to sit in.
-            if(isMobile) const SizedBox(height: 80),
           ],
         ),
       ),
