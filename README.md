@@ -70,7 +70,7 @@ The sidebar provides navigation and at-a-glance statistics.
 
 ## 💻 Downloads
 
-| Platform | Download Link (Installer) | Download Link (Portable) |
+| ETH Hunter v1.0.1 | Download Link (Installer) | Download Link (Portable) |
 | :--- | :---: | :---: |
 | **Windows** (x64) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Win-Setup.exe) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Win-Portable.zip) |
 | **macOS** (Intel & Apple Silicon) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-macOS-Installer.dmg) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-macOS.zip) |
