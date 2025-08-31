@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import 'dart:ui';
 import '../core/theme/app_theme.dart';
 
@@ -23,51 +25,61 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
     Icons.info_outline,
   ];
 
+  bool get isDesktop {
+    if (kIsWeb) return false;
+    return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final customColors = theme.extension<CustomColors>()!;
     final isDark = theme.brightness == Brightness.dark;
-    final navBarColor = isDark ? const Color(0xFF121212) : Colors.white;
+    
+    // MODIFICATION: Use a lighter color for dark mode nav bar
+    final navBarColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
+
+    final navBarContent = Stack(
+      children: [
+        CustomPaint(
+          size: const Size(double.infinity, 84),
+          painter: _NavBarPainter(
+            itemCount: _icons.length,
+            selectedIndex: widget.selectedIndex,
+            navBarColor: isDesktop ? customColors.glassBg : navBarColor,
+          ),
+        ),
+        Positioned.fill(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(_icons.length, (index) {
+              return _buildNavItem(
+                icon: _icons[index],
+                isSelected: widget.selectedIndex == index,
+                onTap: () => widget.onItemSelected(index),
+                customColors: customColors,
+              );
+            }),
+          ),
+        ),
+      ],
+    );
 
     return Container(
       height: 84,
       margin: const EdgeInsets.all(20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            // MODIFICATION: Fixed deprecated 'withOpacity'
-            color: customColors.glassBg.withAlpha((255 * 0.7).round()),
-            child: Stack(
-              children: [
-                CustomPaint(
-                  size: const Size(double.infinity, 84),
-                  painter: _NavBarPainter(
-                    itemCount: _icons.length,
-                    selectedIndex: widget.selectedIndex,
-                    navBarColor: navBarColor,
-                  ),
+        // MODIFICATION: Conditionally apply blur effect only on desktop
+        child: isDesktop
+            ? BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  color: customColors.glassBg.withAlpha((255 * 0.7).round()),
+                  child: navBarContent,
                 ),
-                Positioned.fill(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: List.generate(_icons.length, (index) {
-                      return _buildNavItem(
-                        icon: _icons[index],
-                        isSelected: widget.selectedIndex == index,
-                        onTap: () => widget.onItemSelected(index),
-                        // MODIFICATION: Pass customColors to the method
-                        customColors: customColors,
-                      );
-                    }),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+              )
+            : navBarContent,
       ),
     );
   }
@@ -76,7 +88,6 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
-    // MODIFICATION: Added customColors parameter
     required CustomColors customColors,
   }) {
     final theme = Theme.of(context);
@@ -90,10 +101,11 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Animated circle for selected item
+            // MODIFICATION: Animated floating effect for the selected item
             AnimatedContainer(
               duration: const Duration(milliseconds: 350),
               curve: Curves.easeInOut,
+              transform: Matrix4.translationValues(0, isSelected ? -12 : 0, 0),
               width: isSelected ? 56 : 0,
               height: isSelected ? 56 : 0,
               decoration: BoxDecoration(
@@ -101,12 +113,16 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
                 color: accentColor,
               ),
             ),
-            // Icon
-            Icon(
-              icon,
-              // MODIFICATION: Now correctly uses the passed customColors
-              color: isSelected ? theme.colorScheme.onPrimary : customColors.textMuted,
-              size: 24,
+            // MODIFICATION: Animated icon to move with the circle
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeInOut,
+              transform: Matrix4.translationValues(0, isSelected ? -12 : 0, 0),
+              child: Icon(
+                icon,
+                color: isSelected ? theme.colorScheme.onPrimary : customColors.textMuted,
+                size: 24,
+              ),
             ),
           ],
         ),
@@ -138,17 +154,20 @@ class _NavBarPainter extends CustomPainter {
     final path = Path();
     path.moveTo(0, 20);
     path.quadraticBezierTo(0, 0, 20, 0);
-    path.lineTo(centerOfSelectedItem - 40, 0);
+
+    // MODIFICATION: Widened and deepened the curve for a better fit
+    path.lineTo(centerOfSelectedItem - 50, 0);
     path.cubicTo(
-      centerOfSelectedItem - 25, 0,
-      centerOfSelectedItem - 35, 25,
-      centerOfSelectedItem, 25,
+      centerOfSelectedItem - 30, 0,
+      centerOfSelectedItem - 40, 40,
+      centerOfSelectedItem, 40,
     );
     path.cubicTo(
-      centerOfSelectedItem + 35, 25,
-      centerOfSelectedItem + 25, 0,
-      centerOfSelectedItem + 40, 0,
+      centerOfSelectedItem + 40, 40,
+      centerOfSelectedItem + 30, 0,
+      centerOfSelectedItem + 50, 0,
     );
+    
     path.lineTo(size.width - 20, 0);
     path.quadraticBezierTo(size.width, 0, size.width, 20);
     path.lineTo(size.width, size.height);

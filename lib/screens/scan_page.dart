@@ -31,139 +31,142 @@ class ScanPage extends StatelessWidget {
     final customColors = Theme.of(context).extension<CustomColors>()!;
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('ETH Hunter', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w200)),
-            Row(
-              children: [
-                if (isMobile)
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('ETH Hunter', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w200)),
+              Row(
+                children: [
+                  if (isMobile)
+                    IconButton(
+                      icon: Icon(Icons.bar_chart, color: customColors.textMuted),
+                      tooltip: 'View Stats',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          barrierColor: Colors.black.withAlpha((255 * 0.3).round()),
+                          builder: (_) => const _MobileStatsDialog(),
+                        );
+                      },
+                    ),
                   IconButton(
-                    icon: Icon(Icons.bar_chart, color: customColors.textMuted),
-                    tooltip: 'View Stats',
+                    icon: Icon(Icons.history, color: customColors.textMuted),
+                    tooltip: 'View Session History',
                     onPressed: () {
                       showDialog(
                         context: context,
                         barrierColor: Colors.black.withAlpha((255 * 0.3).round()),
-                        builder: (_) => const _MobileStatsDialog(),
+                        builder: (_) => const _HistoryDialog(),
                       );
                     },
                   ),
-                IconButton(
-                  icon: Icon(Icons.history, color: customColors.textMuted),
-                  tooltip: 'View Session History',
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      barrierColor: Colors.black.withAlpha((255 * 0.3).round()),
-                      builder: (_) => const _HistoryDialog(),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Text('Wallets to Scan:', style: TextStyle(color: customColors.textMuted)),
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 150,
-                  height: 40,
-                  child: TextField(
-                    controller: appProvider.walletsToScanController,
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      filled: true,
-                      fillColor: customColors.glassBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: theme.colorScheme.primary)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.all_inclusive),
-                        tooltip: "Set to Max",
-                        onPressed: appProvider.setMaxWallets,
-                        color: customColors.textMuted,
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Text('Wallets to Scan:', style: TextStyle(color: customColors.textMuted)),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    width: 150,
+                    height: 40,
+                    child: TextField(
+                      controller: appProvider.walletsToScanController,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        isDense: true,
+                        filled: true,
+                        fillColor: customColors.glassBg,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
+                        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
+                        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: theme.colorScheme.primary)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.all_inclusive),
+                          tooltip: "Set to Max",
+                          onPressed: appProvider.setMaxWallets,
+                          color: customColors.textMuted,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: appProvider.isScanning ? appProvider.stopScanning : appProvider.startScanning,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                ],
               ),
-              child: Text(appProvider.isScanning ? 'Stop Scanning' : 'Start Scanning'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 15),
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: customColors.glassBg,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: customColors.borderColor),
-            ),
-            child: ListView.builder(
-              controller: appProvider.scrollController,
-              itemCount: appProvider.logs.length,
-              itemBuilder: (context, index) {
-                final log = appProvider.logs[index];
-                final isWinner = log.balance > 0;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SelectableText.rich(
-                        TextSpan(
-                          style: const TextStyle(fontFamily: 'Inter', fontSize: 13, fontWeight: FontWeight.w400, height: 1.5),
-                          children: [
-                            TextSpan(text: 'Scan: ${log.totalScan} | ', style: TextStyle(color: customColors.textMuted)),
-                            TextSpan(text: 'Winners: ${log.winnerCount} | ', style: TextStyle(color: customColors.green)),
-                            TextSpan(text: 'Balance: ', style: TextStyle(color: customColors.textMuted)),
-                            TextSpan(
-                              text: '${log.balance.toStringAsFixed(6)} ETH\n',
-                              style: TextStyle(color: isWinner ? customColors.green : customColors.red, fontWeight: isWinner ? FontWeight.bold : FontWeight.normal),
-                            ),
-                            TextSpan(
-                              text: log.address,
-                              style: TextStyle(color: theme.colorScheme.primary),
-                              recognizer: TapGestureRecognizer()..onTap = () => _launchEtherscan(log.address),
-                            ),
-                          ],
+              ElevatedButton(
+                onPressed: appProvider.isScanning ? appProvider.stopScanning : appProvider.startScanning,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                ),
+                child: Text(appProvider.isScanning ? 'Stop Scanning' : 'Start Scanning'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: customColors.glassBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: customColors.borderColor),
+              ),
+              child: ListView.builder(
+                controller: appProvider.scrollController,
+                itemCount: appProvider.logs.length,
+                itemBuilder: (context, index) {
+                  final log = appProvider.logs[index];
+                  final isWinner = log.balance > 0;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SelectableText.rich(
+                          TextSpan(
+                            style: const TextStyle(fontFamily: 'Inter', fontSize: 13, fontWeight: FontWeight.w400, height: 1.5),
+                            children: [
+                              TextSpan(text: 'Scan: ${log.totalScan} | ', style: TextStyle(color: customColors.textMuted)),
+                              TextSpan(text: 'Winners: ${log.winnerCount} | ', style: TextStyle(color: customColors.green)),
+                              TextSpan(text: 'Balance: ', style: TextStyle(color: customColors.textMuted)),
+                              TextSpan(
+                                text: '${log.balance.toStringAsFixed(6)} ETH\n',
+                                style: TextStyle(color: isWinner ? customColors.green : customColors.red, fontWeight: isWinner ? FontWeight.bold : FontWeight.normal),
+                              ),
+                              TextSpan(
+                                text: log.address,
+                                style: TextStyle(color: theme.colorScheme.primary),
+                                recognizer: TapGestureRecognizer()..onTap = () => _launchEtherscan(log.address),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      if (index < appProvider.logs.length - 1)
-                        const Divider(height: 16),
-                    ],
-                  ),
-                );
-              },
+                        if (index < appProvider.logs.length - 1)
+                          const Divider(height: 16),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

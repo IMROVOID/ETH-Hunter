@@ -97,7 +97,10 @@ class _MainLayoutState extends State<MainLayout> {
       backgroundColor: Colors.transparent, // For desktop glass effect
       body: Stack(
         children: [
-          _buildAnimatedBackground(context),
+          // MODIFICATION: Conditionally disable animated background on mobile for performance.
+          isDesktop
+              ? _buildAnimatedBackground(context)
+              : Container(color: Theme.of(context).scaffoldBackgroundColor),
           // MODIFICATION: Choose layout based on platform
           isDesktop ? _buildDesktopLayout(context) : _buildMobileLayout(context),
           const GlobalToast(),
