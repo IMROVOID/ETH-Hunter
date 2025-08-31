@@ -42,7 +42,6 @@ class _MainLayoutState extends State<MainLayout> {
     Alignment.bottomCenter,
   ];
   
-  // MODIFICATION: Helper function to check for desktop platforms
   bool get isDesktop {
     if (kIsWeb) return false;
     return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
@@ -86,8 +85,9 @@ class _MainLayoutState extends State<MainLayout> {
     });
     _pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
+      // MODIFICATION: Smoother curve and slightly longer duration for page transitions.
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOutCubic,
     );
   }
 
@@ -97,11 +97,9 @@ class _MainLayoutState extends State<MainLayout> {
       backgroundColor: Colors.transparent, // For desktop glass effect
       body: Stack(
         children: [
-          // MODIFICATION: Conditionally disable animated background on mobile for performance.
           isDesktop
               ? _buildAnimatedBackground(context)
               : Container(color: Theme.of(context).scaffoldBackgroundColor),
-          // MODIFICATION: Choose layout based on platform
           isDesktop ? _buildDesktopLayout(context) : _buildMobileLayout(context),
           const GlobalToast(),
         ],
@@ -109,7 +107,6 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  // WIDGET: Animated Gradient Background (used by both platforms)
   Widget _buildAnimatedBackground(BuildContext context) {
     final customColors = Theme.of(context).extension<CustomColors>()!;
     final scaffoldColor = Theme.of(context).scaffoldBackgroundColor;
@@ -130,7 +127,6 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
   
-  // WIDGET: Desktop layout with Sidebar
   Widget _buildDesktopLayout(BuildContext context) {
     final customColors = Theme.of(context).extension<CustomColors>()!;
     return Column(
@@ -152,11 +148,11 @@ class _MainLayoutState extends State<MainLayout> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 20),
-                        SidebarNavItem(icon: Icons.search, title: 'Scan', isSelected: _selectedIndex == 0, isMinimized: isMinimized, onTap: () => setState(() => _selectedIndex = 0)),
+                        SidebarNavItem(icon: Icons.search, title: 'Scan', isSelected: _selectedIndex == 0, isMinimized: isMinimized, onTap: () => _onItemTapped(0)),
                         const SizedBox(height: 4),
-                        SidebarNavItem(icon: Icons.settings, title: 'Settings', isSelected: _selectedIndex == 1, isMinimized: isMinimized, onTap: () => setState(() => _selectedIndex = 1)),
+                        SidebarNavItem(icon: Icons.settings, title: 'Settings', isSelected: _selectedIndex == 1, isMinimized: isMinimized, onTap: () => _onItemTapped(1)),
                         const SizedBox(height: 4),
-                        SidebarNavItem(icon: Icons.info_outline, title: 'About', isSelected: _selectedIndex == 2, isMinimized: isMinimized, onTap: () => setState(() => _selectedIndex = 2)),
+                        SidebarNavItem(icon: Icons.info_outline, title: 'About', isSelected: _selectedIndex == 2, isMinimized: isMinimized, onTap: () => _onItemTapped(2)),
                         const Spacer(),
                         SidebarStatsWidget(isMinimized: isMinimized),
                         Padding(
@@ -174,7 +170,11 @@ class _MainLayoutState extends State<MainLayout> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(0, 0, 30, 30),
-                      child: _pages[_selectedIndex],
+                      child: PageView(
+                        controller: _pageController,
+                        physics: const NeverScrollableScrollPhysics(), // Disable swipe on desktop
+                        children: _pages,
+                      ),
                     ),
                   ),
                 ],
@@ -186,10 +186,9 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-  // WIDGET: Mobile layout with BottomNavBar
   Widget _buildMobileLayout(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // Show animated background through
+      backgroundColor: Colors.transparent,
       body: PageView(
         controller: _pageController,
         onPageChanged: (index) {

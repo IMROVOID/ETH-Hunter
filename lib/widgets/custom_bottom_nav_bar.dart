@@ -36,17 +36,18 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
     final customColors = theme.extension<CustomColors>()!;
     final isDark = theme.brightness == Brightness.dark;
     
-    // MODIFICATION: Use a lighter color for dark mode nav bar
-    final navBarColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
+    // MODIFICATION: Use a darker color for the nav bar in dark mode.
+    final navBarColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
 
     final navBarContent = Stack(
+      clipBehavior: Clip.none, // Allow the floating icon to draw outside the bounds
       children: [
         CustomPaint(
           size: const Size(double.infinity, 84),
           painter: _NavBarPainter(
             itemCount: _icons.length,
             selectedIndex: widget.selectedIndex,
-            navBarColor: isDesktop ? customColors.glassBg : navBarColor,
+            navBarColor: navBarColor,
           ),
         ),
         Positioned.fill(
@@ -70,7 +71,6 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
       margin: const EdgeInsets.all(20),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
-        // MODIFICATION: Conditionally apply blur effect only on desktop
         child: isDesktop
             ? BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -79,7 +79,11 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
                   child: navBarContent,
                 ),
               )
-            : navBarContent,
+            // MODIFICATION: On mobile, wrap in a container with the solid color to ensure no "second background".
+            : Container(
+                color: navBarColor,
+                child: navBarContent,
+              ),
       ),
     );
   }
@@ -101,11 +105,11 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // MODIFICATION: Animated floating effect for the selected item
+            // MODIFICATION: Increased upward movement for the selected item.
             AnimatedContainer(
               duration: const Duration(milliseconds: 350),
               curve: Curves.easeInOut,
-              transform: Matrix4.translationValues(0, isSelected ? -12 : 0, 0),
+              transform: Matrix4.translationValues(0, isSelected ? -18 : 0, 0),
               width: isSelected ? 56 : 0,
               height: isSelected ? 56 : 0,
               decoration: BoxDecoration(
@@ -113,11 +117,10 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
                 color: accentColor,
               ),
             ),
-            // MODIFICATION: Animated icon to move with the circle
             AnimatedContainer(
               duration: const Duration(milliseconds: 350),
               curve: Curves.easeInOut,
-              transform: Matrix4.translationValues(0, isSelected ? -12 : 0, 0),
+              transform: Matrix4.translationValues(0, isSelected ? -18 : 0, 0),
               child: Icon(
                 icon,
                 color: isSelected ? theme.colorScheme.onPrimary : customColors.textMuted,
@@ -155,17 +158,17 @@ class _NavBarPainter extends CustomPainter {
     path.moveTo(0, 20);
     path.quadraticBezierTo(0, 0, 20, 0);
 
-    // MODIFICATION: Widened and deepened the curve for a better fit
-    path.lineTo(centerOfSelectedItem - 50, 0);
+    // MODIFICATION: Made the curve wider and deeper to better accommodate the floating icon.
+    path.lineTo(centerOfSelectedItem - 60, 0);
     path.cubicTo(
-      centerOfSelectedItem - 30, 0,
-      centerOfSelectedItem - 40, 40,
-      centerOfSelectedItem, 40,
+      centerOfSelectedItem - 35, 0,
+      centerOfSelectedItem - 45, 45,
+      centerOfSelectedItem, 45,
     );
     path.cubicTo(
-      centerOfSelectedItem + 40, 40,
-      centerOfSelectedItem + 30, 0,
-      centerOfSelectedItem + 50, 0,
+      centerOfSelectedItem + 45, 45,
+      centerOfSelectedItem + 35, 0,
+      centerOfSelectedItem + 60, 0,
     );
     
     path.lineTo(size.width - 20, 0);
