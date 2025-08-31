@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
-import 'dart:ui';
 import '../core/theme/app_theme.dart';
 
 class CustomBottomNavBar extends StatefulWidget {
@@ -18,12 +17,49 @@ class CustomBottomNavBar extends StatefulWidget {
   CustomBottomNavBarState createState() => CustomBottomNavBarState();
 }
 
-class CustomBottomNavBarState extends State<CustomBottomNavBar> {
+class CustomBottomNavBarState extends State<CustomBottomNavBar> with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  double _startPosition = 0.0;
+  double _endPosition = 0.0;
+
   final List<IconData> _icons = [
     Icons.search,
     Icons.settings,
     Icons.info_outline,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 350),
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomBottomNavBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedIndex != oldWidget.selectedIndex) {
+      final itemWidth = MediaQuery.of(context).size.width / _icons.length;
+      setState(() {
+        _startPosition = (oldWidget.selectedIndex * itemWidth) + (itemWidth / 2);
+        _endPosition = (widget.selectedIndex * itemWidth) + (itemWidth / 2);
+      });
+      _animationController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   bool get isDesktop {
     if (kIsWeb) return false;
@@ -33,57 +69,65 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final customColors = theme.extension<CustomColors>()!;
     final isDark = theme.brightness == Brightness.dark;
-    
-    // MODIFICATION: Use a darker color for the nav bar in dark mode.
-    final navBarColor = isDark ? const Color(0xFF1F1F1F) : Colors.white;
-
-    final navBarContent = Stack(
-      clipBehavior: Clip.none, // Allow the floating icon to draw outside the bounds
-      children: [
-        CustomPaint(
-          size: const Size(double.infinity, 84),
-          painter: _NavBarPainter(
-            itemCount: _icons.length,
-            selectedIndex: widget.selectedIndex,
-            navBarColor: navBarColor,
-          ),
-        ),
-        Positioned.fill(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(_icons.length, (index) {
-              return _buildNavItem(
-                icon: _icons[index],
-                isSelected: widget.selectedIndex == index,
-                onTap: () => widget.onItemSelected(index),
-                customColors: customColors,
-              );
-            }),
-          ),
-        ),
-      ],
-    );
+    final navBarColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    const navBarHeight = 65.0; // Navbar height
+    const indicatorSize = 70.0; // The overflowing circle size
 
     return Container(
-      height: 84,
-      margin: const EdgeInsets.all(20),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: isDesktop
-            ? BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      height: 100, // Total area for the navbar + overflow
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (context, child) {
+          final double currentPosition = Tween<double>(begin: _startPosition, end: _endPosition).evaluate(_animation);
+          
+          return Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.bottomCenter,
+            children: [
+              // Layer 1: The sliding, overflowing, colored circle
+              Positioned(
+                left: currentPosition - (indicatorSize / 2),
+                top: (navBarHeight - indicatorSize) / 2,
                 child: Container(
-                  color: customColors.glassBg.withAlpha((255 * 0.7).round()),
-                  child: navBarContent,
+                  width: indicatorSize,
+                  height: indicatorSize,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
                 ),
-              )
-            // MODIFICATION: On mobile, wrap in a container with the solid color to ensure no "second background".
-            : Container(
-                color: navBarColor,
-                child: navBarContent,
               ),
+
+              // Layer 2: The navbar shape with the animated cutout
+              CustomPaint(
+                size: const Size(double.infinity, navBarHeight),
+                painter: _NavBarPainter(
+                  itemCount: _icons.length,
+                  indicatorPosition: currentPosition,
+                  indicatorRadius: indicatorSize / 2,
+                  navBarColor: navBarColor,
+                ),
+              ),
+
+              // Layer 3: The icons
+              SizedBox(
+                height: navBarHeight,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: List.generate(_icons.length, (index) {
+                    return _buildNavItem(
+                      icon: _icons[index],
+                      isSelected: widget.selectedIndex == index,
+                      onTap: () => widget.onItemSelected(index),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -92,42 +136,18 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
     required IconData icon,
     required bool isSelected,
     required VoidCallback onTap,
-    required CustomColors customColors,
   }) {
     final theme = Theme.of(context);
-    final accentColor = theme.colorScheme.primary;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 70,
-        height: 70,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // MODIFICATION: Increased upward movement for the selected item.
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 350),
-              curve: Curves.easeInOut,
-              transform: Matrix4.translationValues(0, isSelected ? -18 : 0, 0),
-              width: isSelected ? 56 : 0,
-              height: isSelected ? 56 : 0,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: accentColor,
-              ),
-            ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 350),
-              curve: Curves.easeInOut,
-              transform: Matrix4.translationValues(0, isSelected ? -18 : 0, 0),
-              child: Icon(
-                icon,
-                color: isSelected ? theme.colorScheme.onPrimary : customColors.textMuted,
-                size: 24,
-              ),
-            ),
-          ],
+    final customColors = theme.extension<CustomColors>()!;
+    
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Icon(
+          icon,
+          color: isSelected ? theme.colorScheme.onPrimary : customColors.textMuted,
+          size: 26,
         ),
       ),
     );
@@ -136,12 +156,14 @@ class CustomBottomNavBarState extends State<CustomBottomNavBar> {
 
 class _NavBarPainter extends CustomPainter {
   final int itemCount;
-  final int selectedIndex;
+  final double indicatorPosition;
+  final double indicatorRadius;
   final Color navBarColor;
 
   _NavBarPainter({
     required this.itemCount,
-    required this.selectedIndex,
+    required this.indicatorPosition,
+    required this.indicatorRadius,
     required this.navBarColor,
   });
 
@@ -150,36 +172,37 @@ class _NavBarPainter extends CustomPainter {
     final paint = Paint()
       ..color = navBarColor
       ..style = PaintingStyle.fill;
-
-    final itemWidth = size.width / itemCount;
-    final centerOfSelectedItem = (selectedIndex * itemWidth) + (itemWidth / 2);
-
-    final path = Path();
-    path.moveTo(0, 20);
-    path.quadraticBezierTo(0, 0, 20, 0);
-
-    // MODIFICATION: Made the curve wider and deeper to better accommodate the floating icon.
-    path.lineTo(centerOfSelectedItem - 60, 0);
-    path.cubicTo(
-      centerOfSelectedItem - 35, 0,
-      centerOfSelectedItem - 45, 45,
-      centerOfSelectedItem, 45,
-    );
-    path.cubicTo(
-      centerOfSelectedItem + 45, 45,
-      centerOfSelectedItem + 35, 0,
-      centerOfSelectedItem + 60, 0,
-    );
     
-    path.lineTo(size.width - 20, 0);
-    path.quadraticBezierTo(size.width, 0, size.width, 20);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-    path.close();
+    const cornerRadius = Radius.circular(20);
+    const cutoutPadding = 10.0; // The space between the indicator and the cutout edge
 
-    canvas.drawPath(path, paint);
+    // Main navbar body as a rounded rectangle path
+    final navPath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        cornerRadius,
+      ));
+
+    // Circle path for the cutout
+    final circlePath = Path()
+      ..addOval(Rect.fromCircle(
+        center: Offset(indicatorPosition, size.height / 2),
+        radius: indicatorRadius + cutoutPadding,
+      ));
+
+    // Create the final path by cutting the circle out of the navbar body
+    final finalPath = Path.combine(
+      PathOperation.difference,
+      navPath,
+      circlePath,
+    );
+
+    canvas.drawPath(finalPath, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _NavBarPainter oldDelegate) {
+    return indicatorPosition != oldDelegate.indicatorPosition ||
+           navBarColor != oldDelegate.navBarColor;
+  }
 }

@@ -80,12 +80,12 @@ class _MainLayoutState extends State<MainLayout> {
   }
   
   void _onItemTapped(int index) {
+    if (_selectedIndex == index) return;
     setState(() {
       _selectedIndex = index;
     });
     _pageController.animateToPage(
       index,
-      // MODIFICATION: Smoother curve and slightly longer duration for page transitions.
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOutCubic,
     );
@@ -129,6 +129,9 @@ class _MainLayoutState extends State<MainLayout> {
   
   Widget _buildDesktopLayout(BuildContext context) {
     final customColors = Theme.of(context).extension<CustomColors>()!;
+    // Use a separate PageController for desktop to disable swiping
+    final desktopPageController = PageController();
+
     return Column(
       children: [
         const WindowTitleBar(),
@@ -171,8 +174,8 @@ class _MainLayoutState extends State<MainLayout> {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(0, 0, 30, 30),
                       child: PageView(
-                        controller: _pageController,
-                        physics: const NeverScrollableScrollPhysics(), // Disable swipe on desktop
+                        controller: desktopPageController, // Use desktop controller
+                        physics: const NeverScrollableScrollPhysics(), // Disable swipe
                         children: _pages,
                       ),
                     ),

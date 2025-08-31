@@ -31,17 +31,6 @@ class ScanPage extends StatelessWidget {
     final customColors = Theme.of(context).extension<CustomColors>()!;
     final theme = Theme.of(context);
 
-    final scanButton = ElevatedButton(
-      onPressed: appProvider.isScanning ? appProvider.stopScanning : appProvider.startScanning,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-      ),
-      child: Text(appProvider.isScanning ? 'Stop Scanning' : 'Start Scanning'),
-    );
-
     final pageContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -80,39 +69,34 @@ class ScanPage extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Row(
-          mainAxisAlignment: isMobile ? MainAxisAlignment.center : MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              children: [
-                Text('Wallets to Scan:', style: TextStyle(color: customColors.textMuted)),
-                const SizedBox(width: 10),
-                SizedBox(
-                  width: 150,
-                  height: 40,
-                  child: TextField(
-                    controller: appProvider.walletsToScanController,
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      filled: true,
-                      fillColor: customColors.glassBg,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: theme.colorScheme.primary)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.all_inclusive),
-                        tooltip: "Set to Max",
-                        onPressed: appProvider.setMaxWallets,
-                        color: customColors.textMuted,
-                      ),
-                    ),
+            Text('Wallets to Scan:', style: TextStyle(color: customColors.textMuted)),
+            const SizedBox(width: 10),
+            SizedBox(
+              width: 150,
+              height: 40,
+              child: TextField(
+                controller: appProvider.walletsToScanController,
+                textAlign: TextAlign.center,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  isDense: true,
+                  filled: true,
+                  fillColor: customColors.glassBg,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: customColors.borderColor)),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: theme.colorScheme.primary)),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.all_inclusive),
+                    tooltip: "Set to Max",
+                    onPressed: appProvider.setMaxWallets,
+                    color: customColors.textMuted,
                   ),
                 ),
-              ],
+              ),
             ),
-            if (!isMobile) scanButton,
           ],
         ),
         const SizedBox(height: 15),
@@ -170,25 +154,38 @@ class ScanPage extends StatelessWidget {
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 21.0, vertical: 8.0),
-        child: isMobile
-            ? Stack(
-                children: [
-                  pageContent,
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 15.0),
-                      child: scanButton,
+        padding: const EdgeInsets.fromLTRB(21.0, 15.0, 21.0, 0), // Increased top and side padding
+        child: Stack(
+          children: [
+            pageContent,
+            if (isMobile)
+              Positioned(
+                bottom: 100, // Position above the navbar
+                right: 0,
+                child: FloatingActionButton(
+                  onPressed: appProvider.isScanning ? appProvider.stopScanning : appProvider.startScanning,
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) {
+                      return ScaleTransition(scale: animation, child: child);
+                    },
+                    child: Icon(
+                      appProvider.isScanning ? Icons.stop : Icons.play_arrow,
+                      key: ValueKey<bool>(appProvider.isScanning),
                     ),
-                  )
-                ],
-              )
-            : pageContent,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
 }
+
+// ... (The rest of the file remains the same)
 
 class _HistoryDialog extends StatelessWidget {
   const _HistoryDialog();

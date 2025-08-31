@@ -21,7 +21,7 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:system_theme/system_theme.dart';
-import 'package:dynamic_color/dynamic_color.dart'; // MODIFICATION: Added for wallpaper color
+import 'package:dynamic_color/dynamic_color.dart';
 
 import 'core/theme/app_theme.dart';
 import 'providers/app_provider.dart';
@@ -44,15 +44,22 @@ bool isDesktop() {
   return Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 }
 
+// MODIFICATION: Helper function to make the wallpaper-derived color more vibrant.
+Color _saturateColor(Color color) {
+  final hslColor = HSLColor.fromColor(color);
+  // Increase saturation by 15%, capping at 1.0
+  final saturatedColor = hslColor.withSaturation((hslColor.saturation + 0.15).clamp(0.0, 1.0));
+  return saturatedColor.toColor();
+}
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // MODIFICATION: Desktop-only window initialization
   if (isDesktop()) {
     await windowManager.ensureInitialized();
   }
 
-  // MODIFICATION: Platform-aware path for portable data storage
   final String executableDirectory;
   if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
     executableDirectory = (await getApplicationDocumentsDirectory()).path;
@@ -62,7 +69,6 @@ void main() async {
     executableDirectory = (await getApplicationDocumentsDirectory()).path;
   }
 
-  // MODIFICATION: Desktop-only window options
   if (isDesktop()) {
     WindowOptions windowOptions = const WindowOptions(
       size: Size(900, 620),
@@ -81,7 +87,6 @@ void main() async {
 
   runApp(MyApp(executableDirectory: executableDirectory));
   
-  // MODIFICATION: Desktop-only bitsdojo_window setup
   if (isDesktop()) {
     doWhenWindowReady(() {
       final win = appWindow;
@@ -102,16 +107,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => AppProvider(executableDirectory: executableDirectory),
-      // MODIFICATION: Use DynamicColorBuilder for Material You theming on Android
       child: DynamicColorBuilder(
         builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-          // Determine the accent color based on platform
           Color accentColor;
-          if (lightDynamic != null && darkDynamic != null) {
-            // Use wallpaper color on Android
-            accentColor = lightDynamic.primary;
+          if (lightDynamic != null && darkDynamic != null && !isDesktop()) {
+            // MODIFICATION: Use the more vibrant color on mobile.
+            accentColor = _saturateColor(lightDynamic.primary);
           } else {
-            // Use system accent color on Desktop
             accentColor = SystemTheme.accentColor.accent;
           }
 
