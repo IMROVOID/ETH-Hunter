@@ -64,7 +64,7 @@ flutter_launcher_icons:
   image_path: "assets/icons/app-hq.png"
   
   # Android specific settings
-  android: true 
+  android: "ic_launcher" 
   # adaptive_icon_background is for the background layer of adaptive icons.
   adaptive_icon_background: "#121212"
   # adaptive_icon_foreground is for the foreground layer of adaptive icons.
