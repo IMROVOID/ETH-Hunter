@@ -72,8 +72,8 @@ The sidebar provides navigation and at-a-glance statistics.
 
 | ETH Hunter v1.0.1 | Download Link (Installer) | Download Link (Portable) |
 | :--- | :---: | :---: |
-| **Windows** (x64) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.0-Windows-Setup.exe) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Win-Portable.zip) |
-| **macOS** (Intel & Apple Silicon) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-macOS-Installer.dmg) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-macOS.zip) |
+| **Windows** (x64) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.0-Windows-Setup.exe) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Windows-Portable.zip) |
+| **macOS** (Intel & Apple Silicon) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-macOS.dmg) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-macOS-Portable.zip) |
 | **Linux** (x64) | - | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Linux-Portable.zip) |
 | **Android** (.apk) | [**Download**](https://github.com/IMROVOID/ETH-Hunter/releases/download/v1.0.1/ETH-Hunter-v1.0.1-Android.apk) | - |
 
