@@ -5,32 +5,32 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.2.6 <4.0.0' # Updated SDK constraint for compatibility
+  sdk: '>=3.2.6 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
   # UI & Theming
-  system_theme: ^3.0.0 # MODIFICATION: Updated to fix namespace issue
+  system_theme: ^3.0.0 
   flutter_svg: ^2.0.10+1
   dynamic_color: ^1.7.0
   
   # Backend & Logic
-  web3dart: ^2.7.1 # MODIFICATION: Downgraded to a stable version
+  web3dart: ^2.7.1 
   http: ^1.2.1
   
   # State Management
   provider: ^6.1.2
 
   # Desktop Specific
-  window_manager: ^0.5.0 # MODIFICATION: Updated to latest
+  window_manager: ^0.5.0 
   bitsdojo_window: ^0.1.6 
   
   # Storage & Utils
   shared_preferences: ^2.2.3
   path_provider: ^2.1.3
-  url_launcher: ^6.3.0 # MODIFICATION: Updated to latest
+  url_launcher: ^6.3.0 
   path: ^1.9.0
   
   cupertino_icons: ^1.0.8
@@ -39,7 +39,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^4.0.0 # MODIFICATION: Updated to latest
+  flutter_lints: ^4.0.0
   flutter_launcher_icons: ^0.13.1
 
 flutter:
@@ -58,10 +58,22 @@ flutter:
         - asset: assets/fonts/Inter-Regular.ttf
           weight: 400
 
+# Full configuration for the launcher icon generator.
 flutter_launcher_icons:
-  android: true
-  ios: true
+  # The image_path is used for all platforms unless overridden.
   image_path: "assets/icons/app-hq.png"
+  
+  # Android specific settings
+  android: true 
+  # adaptive_icon_background is for the background layer of adaptive icons.
+  adaptive_icon_background: "#121212"
+  # adaptive_icon_foreground is for the foreground layer of adaptive icons.
+  adaptive_icon_foreground: "assets/icons/app-hq.png"
+
+  # iOS specific settings
+  ios: true
+
+  # Windows specific settings
   windows:
     generate: true
     image_path: "assets/icons/app-hq.png"
