@@ -141,7 +141,6 @@ jobs:
       - name: Install create-dmg
         run: brew install create-dmg
 
-      # CORRECTED LOGIC STARTS HERE
       - name: Stage Application Bundle
         run: |
           mkdir -p staging
@@ -168,9 +167,54 @@ jobs:
             ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS.dmg
             ETH-Hunter-${{ steps.set_version.outputs.version }}-macOS-Portable.zip
 
-  # JOB 4: Create the final GitHub Release
+  # JOB 4: Build the application for Android
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag_name || github.ref }}
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '12.x'
+          
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Android release
+        run: flutter build apk --release
+
+      - name: Set Version Name
+        id: set_version
+        run: |
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            echo "version=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Rename APK
+        run: mv build/app/outputs/flutter-apk/app-release.apk ETH-Hunter-${{ steps.set_version.outputs.version }}-Android.apk
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: ETH-Hunter-${{ steps.set_version.outputs.version }}-Android.apk
+
+  # JOB 5: Create the final GitHub Release
   create-release:
-    needs: [build-windows, build-linux, build-macos]
+    needs: [build-windows, build-linux, build-macos, build-android]
     runs-on: ubuntu-latest
 
     steps:
@@ -199,3 +243,4 @@ jobs:
             release-artifacts/linux-build/*.zip
             release-artifacts/macos-build/*.zip
             release-artifacts/macos-build/*.dmg
+            release-artifacts/android-build/*.apk
