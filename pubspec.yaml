@@ -2,7 +2,8 @@ name: eth_hunter
 description: "A polished Flutter desktop application for ETH wallet scanning."
 publish_to: 'none' 
 
-version: 1.0.0+1
+# MODIFICATION: Updated version to 1.0.1 and build number to 2.
+version: 1.0.1+2
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
@@ -33,6 +34,9 @@ dependencies:
   url_launcher: ^6.3.0 
   path: ^1.9.0
   
+  # MODIFICATION: Added package_info_plus to read the app version dynamically.
+  package_info_plus: ^8.0.0
+
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -40,7 +44,6 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^4.0.0
-  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
@@ -57,22 +60,3 @@ flutter:
           weight: 200
         - asset: assets/fonts/Inter-Regular.ttf
           weight: 400
-
-# Full configuration for the launcher icon generator.
-flutter_launcher_icons:
-  # The image_path is used for all platforms unless overridden.
-  image_path: "assets/icons/app-hq.png"
-  
-  # Android specific settings
-  # By removing the adaptive_icon_background and adaptive_icon_foreground keys,
-  # we are telling the generator to create a legacy, non-adaptive icon.
-  android: true 
-
-  # iOS specific settings
-  ios: true
-
-  # Windows specific settings
-  windows:
-    generate: true
-    image_path: "assets/icons/app-hq.png"
-    icon_size: 256

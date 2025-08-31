@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart'; // MODIFICATION: Import the package
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/theme/app_theme_mode.dart';
@@ -53,7 +54,8 @@ enum ToastType { info, error }
 // The main state management class
 class AppProvider with ChangeNotifier {
   // --- App Info ---
-  final String appVersion = "v1.0.0";
+  // MODIFICATION: Changed from a hardcoded string to a variable that will be loaded.
+  String appVersion = "v0.0.0"; 
   static const int infuraDailyLimit = 3000000;
   final String executableDirectory;
 
@@ -92,8 +94,28 @@ class AppProvider with ChangeNotifier {
   String latestVersionUrl = '';
 
   AppProvider({required this.executableDirectory}) {
-    _loadSettings();
+    // MODIFICATION: Load all initial data in a single async method.
+    _initializeApp();
+  }
+
+  // MODIFICATION: New method to load app info and settings.
+  Future<void> _initializeApp() async {
+    await _loadAppInfo();
+    await _loadSettings();
     checkForUpdate(); // Check silently on startup
+  }
+
+  // MODIFICATION: New method to load the version from the package.
+  Future<void> _loadAppInfo() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      appVersion = 'v${packageInfo.version}';
+      notifyListeners(); // Notify listeners in case the UI is already built
+    } catch (e) {
+      debugPrint("Failed to get package info: $e");
+      appVersion = "v?.?.?"; // Fallback version
+      notifyListeners();
+    }
   }
 
   /// Compares two version strings (e.g., "v1.2.3"). Returns true if remoteVersion is newer.
